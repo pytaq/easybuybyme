@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--开启springmvc注解模式-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <!--配置jsons数据 编码 解决中文乱码-->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <list>
+                        <!-- 默认是时间戳   json中Date的日期转换器    转换输出yyyy-MM-dd HH:mm:ss格式的日期
+-->
+                        <value>WriteDateUseDateFormat</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+
+    </mvc:annotation-driven>
+    <!--servlet静态资源,springmvc不能处理的请求交给Tomcat-->
+    <mvc:default-servlet-handler/>
+
+
+    <!--配置jsp显示-->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <!-- 配置支持媒体类型 -->
+        <property name="contentNegotiationManager">
+            <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+                <property name="mediaTypes">
+                    <map>
+                        <entry key="json" value="application/json"></entry>
+                        <entry key="xml" value="application/xml"></entry>
+                        <entry key="pdf" value="application/pdf"></entry>
+                    </map>
+                </property>
+            </bean>
+        </property>
+
+        <!-- 指定默认视图 -->
+        <property name="defaultViews">
+            <!-- 支持多个视图 -->
+            <list>
+                <!-- 对josn格式视图支持 -->
+                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"></bean>
+                <!-- xml格式视图支持 -->
+                <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+                    <constructor-arg>
+                        <bean class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+                            <property name="classesToBeBound">
+                                <list>
+                                    <value>cn.gwj.entity.User</value>
+                                </list>
+                            </property>
+                        </bean>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+
+        <property name="viewResolvers">
+            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+                <property name="prefix" value="/"/>
+                <property name="suffix" value=".jsp"/>
+            </bean>
+        </property>
+    </bean>
+
+
+    <!--扫描控制器-->
+<!--    <context:component-scan base-package="cn.gwj.controller"/>-->
+
+    <!--自定义静态资源访问路径-->
+    <mvc:resources mapping="/css/**" location="statics/css/"/>
+    <mvc:resources mapping="/js/**" location="statics/js/"/>
+    <mvc:resources mapping="/images/**" location="statics/images/"/>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--        设置文件上传大小-->
+        <property name="maxUploadSize" value="5000000"/>
+        <!--        设置字符编码-->
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <!-- 配置拦截器interceptors -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--定义拦截url-->
+            <mvc:mapping path="/admin/**"/>
+            <!--定义拦截类-->
+            <bean class="cn.gwj.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
+
+</beans>

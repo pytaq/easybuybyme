@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.gwj.dao.UserDao">
+    <resultMap id="userMap" type="User">
+        <id property="id" column="id"/>
+        <result property="loginName" column="loginName"/>
+        <result property="userName" column="userName"/>
+        <result property="password" column="password"/>
+        <result property="sex" column="sex"/>
+        <result property="identityCode" column="identityCode"/>
+        <result property="email" column="email"/>
+        <result property="mobile" column="mobile"/>
+        <result property="type" column="type"/>
+<!--        <collection property="address" ofType="UserAddress" resultMap="addressMap"/>-->
+    </resultMap>
+
+<!--    <resultMap id="addressMap" type="UserAddress" >-->
+<!--        <id property="id" column="aid"/>-->
+<!--        <result property="address" column="address"/>-->
+<!--        <result property="remark" column="remark"/>-->
+<!--    </resultMap>-->
+
+    <select id="getUser" resultMap="userMap">
+        select * from easybuy_user
+        <where>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+            <if test="loginName!=null">
+                and loginName=#{loginName}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>
